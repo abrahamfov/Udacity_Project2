@@ -1,14 +1,8 @@
 [
     {
         "ParameterKey": "EnvironmentName",
-        "ParameterValue": "UdagramProject"
+        "ParameterValue": "UdagramIACProject"
     },
-    
-    {
-        "ParameterKey": "InstanceTypeEC2",
-        "ParameterValue": "10.0.4.0/24"
-    },
-    
     {
         "ParameterKey": "VpcCIDR",
         "ParameterValue": "10.0.0.0/16"
