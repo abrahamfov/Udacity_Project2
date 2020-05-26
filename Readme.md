@@ -29,4 +29,4 @@ Example for servers:
 ./delete.sh stackname
 
 # Infrastructure Diagram
-![Alt text](/Udagram_Project_Abraham.png)
+![Alt text](/Diagram/Udagram_Project_Abraham.png)
