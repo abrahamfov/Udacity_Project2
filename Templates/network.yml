@@ -1,5 +1,6 @@
 Description: >
-  Abraham Ortiz / Udagram Project - Infrastructure
+  Abraham Ortiz / Udagram Project
+  AWS_CloudFormation script to create infrastructure stack
 
 Parameters:
 
@@ -26,11 +27,6 @@ Parameters:
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for this private subnet
     Type: String
-    
-  # Paramenters are entirely optional.
-  # but using them will make your cloudformation templates more reusable
-  # use them for things that may change over time, such as instance type,
-  # VPCs and so on.
 
 Resources:
   VPC:

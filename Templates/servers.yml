@@ -1,5 +1,6 @@
 Description: >
-  Abraham Ortiz / Udagram Project - Servers
+  Abraham Ortiz / Udagram Project
+  AWS_CloudFormation script to create servers stack
 
 Parameters:
 
@@ -7,8 +8,14 @@ Parameters:
     Description: An environment name that will be prefixed to resources
     Type: String
 
+# Mappings:
+#   WebAppRegion:
+#     us-west-2:
+#       HVM64: ami-003634241a8fcdec0
+
 Resources:
 
+# Load Balancer Security Group
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -26,11 +33,13 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-  
+
+# Web Server Security Group
+# Add ingress rules for bastion hosts
   WebServerSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow http to our hosts and SSH from local only
+      GroupDescription: Allow http to EC2 and SHH from bastion hosts
       VpcId:
         Fn::ImportValue:
           !Sub "${EnvironmentName}-VPCID"
@@ -39,17 +48,27 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-          CidrIp: 0.0.0.0/0
-          # CidrIp: !Ref SSHLocation
+        # - IpProtocol: tcp
+        #   FromPort: 22
+        #   ToPort: 22
+        #   CidrIp:
+        #     Fn::ImportValue: !Sub ${WebAppEnv}-BASTION0-CIDR
+        # - IpProtocol: tcp
+        #   FromPort: 22
+        #   ToPort: 22
+        #   CidrIp:
+        #     Fn::ImportValue: !Sub ${WebAppEnv}-BASTION1-CIDR
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
           ToPort: 65535
           CidrIp: 0.0.0.0/0
-  
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-WebServerSecGroup
+
+# Web App Launch Configuration
+# Review iam profiles and image id from mappings
   WebAppLaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
@@ -57,19 +76,25 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash
           apt-get update -y
+          apt-get install unzip awscli -y
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
           echo “it works! Udagram, Udacity” > index.html
-      ImageId: ami-003634241a8fcdec0
+      # IamInstanceProfiles:
+      #   Fn::ImportValue: !Sub "${EnvironmentName}-IAM-NAME"
       SecurityGroups:
         - Ref: WebServerSecGroup
-      InstanceType: t3.small
       BlockDeviceMappings:
         - DeviceName: "/dev/sdk"
           Ebs:
             VolumeSize: '10'
+            DeleteOnTermination: true
+      ImageId: ami-003634241a8fcdec0
+      # ImageId: !FindInMap [WebAppRegion, !Ref "AWS::Region", HVM64]
+      InstanceType: t3.small
   
+# Web App Security Group
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -83,7 +108,8 @@ Resources:
       DesiredCapacity: '4'
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
-  
+
+# Web App Load Balancer
   WebAppLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -92,7 +118,8 @@ Resources:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
         SecurityGroups:
         - Ref: LBSecGroup
-  
+
+# Listener
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -103,7 +130,8 @@ Resources:
       LoadBalancerArn: !Ref WebAppLB
       Port: '80'
       Protocol: HTTP
-  
+
+# Application Load Balancer Listener
   ALBListenerRule:
       Type: AWS::ElasticLoadBalancingV2::ListenerRule
       Properties:
@@ -115,7 +143,8 @@ Resources:
           Values: [/]
         ListenerArn: !Ref 'Listener'
         Priority: 1
-  
+
+# Web App Target Group 
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
