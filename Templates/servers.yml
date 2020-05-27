@@ -48,6 +48,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+        # Security Group Ingress rules for bastion hosts connection
         # - IpProtocol: tcp
         #   FromPort: 22
         #   ToPort: 22
@@ -81,8 +82,8 @@ Resources:
           systemctl start apache2.service
           cd /var/www/html
           echo “it works! Udagram, Udacity” > index.html
-      # IamInstanceProfiles:
-      #   Fn::ImportValue: !Sub "${EnvironmentName}-IAM-NAME"
+      IamInstanceProfile:
+        Fn::ImportValue: !Sub "${EnvironmentName}-IAM-NAME"
       SecurityGroups:
         - Ref: WebServerSecGroup
       BlockDeviceMappings:
@@ -91,21 +92,19 @@ Resources:
             VolumeSize: '10'
             DeleteOnTermination: true
       ImageId: ami-003634241a8fcdec0
-      # ImageId: !FindInMap [WebAppRegion, !Ref "AWS::Region", HVM64]
       InstanceType: t3.small
   
 # Web App Security Group
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      VPCZoneIdentifier:
-        - Fn::ImportValue:
-          !Sub "${EnvironmentName}-PRIV-NETS"
-      LaunchConfigurationName:
-        Ref: WebAppLaunchConfig
       MinSize: '4'
       MaxSize: '4'
       DesiredCapacity: '4'
+      VPCZoneIdentifier:
+        - Fn::ImportValue:
+          !Sub "${EnvironmentName}-PRIV-NETS"
+      LaunchConfigurationName: !Ref WebAppLaunchConfig
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
 
@@ -159,18 +158,9 @@ Resources:
       VpcId: 
         Fn::ImportValue:
           Fn::Sub: "${EnvironmentName}-VPCID"
-  
-# instace profile contains the IAM Role name(s) that we want to associate to our auto scaling EC2 Servers
-# never give too much permissions to your EC2 instances! if they get hacked, the permissions get hacked also!
-# in this example, I create a Role called UdacityS3ReadOnlyC2 and just give it a policy of S3 Read-Only Access
-
-  ProfileWithRolesForOurApp:
-    Type: AWS::IAM::InstanceProfile
-    Properties: 
-      Roles:
-        - UdacityS3ReadOnlyEC2
 
 Outputs:
+
   LoadBalancerDNS:
     Value: !Join ["",['http://',!GetAtt WebAppLB.DNSName]]
     Export:
