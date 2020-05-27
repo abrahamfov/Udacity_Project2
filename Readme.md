@@ -4,6 +4,9 @@
 # Overview
 This is a Cloud Formation setup to deploy an infrastructure and its resources for a highly available app as requirement to Cloud DevOps Nanodegre of Udacity.
 
+LoadBalancer URL: 	http://udagr-WebAp-1P1XM5QW87ZGU-231856614.us-west-2.elb.amazonaws.com
+(This link is available at the moment of submission of the project)
+
 ## To create a stack:
 
 ./create.sh stackname template-body parameters
