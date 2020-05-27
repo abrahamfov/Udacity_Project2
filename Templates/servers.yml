@@ -81,7 +81,8 @@ Resources:
           apt-get install apache2 -y
           systemctl start apache2.service
           cd /var/www/html
-          echo “it works! Udagram, Udacity” > index.html
+          aws s3 cp s3://udacity-demo-1/udacity.zip .
+          unzip -o udacity.zip
       IamInstanceProfile:
         Fn::ImportValue: !Sub "${EnvironmentName}-IAM-NAME"
       SecurityGroups:
@@ -103,7 +104,7 @@ Resources:
       DesiredCapacity: '4'
       VPCZoneIdentifier:
         - Fn::ImportValue:
-          !Sub "${EnvironmentName}-PRIV-NETS"
+            !Sub "${EnvironmentName}-PRIV-NETS"
       LaunchConfigurationName: !Ref WebAppLaunchConfig
       TargetGroupARNs:
         - Ref: WebAppTargetGroup
@@ -115,7 +116,7 @@ Resources:
       Subnets:
         - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
         - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
-        SecurityGroups:
+      SecurityGroups:
         - Ref: LBSecGroup
 
 # Listener
