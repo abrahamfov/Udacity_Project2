@@ -9,27 +9,27 @@ LoadBalancer URL: 	http://udagr-WebAp-1P1XM5QW87ZGU-231856614.us-west-2.elb.amaz
 
 ## To create a stack:
 
-./create.sh stackname template-body parameters
+`./create.sh stackname template-body parameters`
 
-Example for infrastructure:
-./create.sh udagram ./Templates/network.yml ./Parameters/network-parameters.json
+* Example for infrastructure:
+`./create.sh udagram ./Templates/network.yml ./Parameters/network-parameters.json`
 
-Example for servers:
-./create.sh udagram ./Templates/servers.yml ./Parameters/servers-parameters.json
+* Example for servers:
+`./create.sh udagram ./Templates/servers.yml ./Parameters/servers-parameters.json`
 
 ## To update a stack:
 
-./update.sh stackname template-body parameters
+`./update.sh stackname template-body parameters`
 
-Example for infrastructure:
-./update.sh udagram ./Templates/network.yml ./Parameters/network-parameters.json
+* Example for infrastructure:
+`./update.sh udagram ./Templates/network.yml ./Parameters/network-parameters.json`
 
-Example for servers:
-./update.sh udagram ./Templates/servers.yml ./Parameters/servers-parameters.json
+* Example for servers:
+`./update.sh udagram ./Templates/servers.yml ./Parameters/servers-parameters.json`
 
 ## To delete a stack:
 
-./delete.sh stackname
+`./delete.sh stackname`
 
 ## Settings for bastion hosts
 
